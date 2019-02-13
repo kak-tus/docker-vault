@@ -1,7 +1,7 @@
 FROM alpine:3.8
 
 # This is the release of Vault to pull in.
-ENV VAULT_VERSION=1.0.2
+ENV VAULT_VERSION=1.0.3-test
 
 # Create a vault user and group first so the IDs get set the same way,
 # even as the rest of this may change over time.
@@ -16,7 +16,7 @@ RUN set -eux; \
         armhf) ARCH='arm' ;; \
         aarch64) ARCH='arm64' ;; \
         x86_64) ARCH='amd64' ;; \
-        x86) ARCH='386' ;; \ 
+        x86) ARCH='386' ;; \
         *) echo >&2 "error: unsupported architecture: $apkArch"; exit 1 ;; \
     esac && \
     VAULT_GPGKEY=91A6E7F85D05C65630BEF18951852D87348FFC4C; \
@@ -32,12 +32,9 @@ RUN set -eux; \
     test -z "$found" && echo >&2 "error: failed to fetch GPG key $VAULT_GPGKEY" && exit 1; \
     mkdir -p /tmp/build && \
     cd /tmp/build && \
-    wget https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_${ARCH}.zip && \
-    wget https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_SHA256SUMS && \
-    wget https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_SHA256SUMS.sig && \
-    gpg --batch --verify vault_${VAULT_VERSION}_SHA256SUMS.sig vault_${VAULT_VERSION}_SHA256SUMS && \
-    grep vault_${VAULT_VERSION}_linux_${ARCH}.zip vault_${VAULT_VERSION}_SHA256SUMS | sha256sum -c && \
-    unzip -d /bin vault_${VAULT_VERSION}_linux_${ARCH}.zip && \
+    wget https://github.com/kak-tus/vault/releases/download/v${VAULT_VERSION}/vault && \
+    chmod +x vault && \
+    mv vault /bin/ && \
     cd /tmp && \
     rm -rf /tmp/build && \
     gpgconf --kill dirmngr && \
